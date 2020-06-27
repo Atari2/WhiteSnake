@@ -75,7 +75,7 @@ def clean_old_pointers(romname):
         print('No pointers to autoclean were found')
     try:
         os.listdir('./global_ow_code').index('autoclean_spr_pointers.asm')
-        process = subprocess.Popen(['asar.exe', './global_ow_code/autoclean_pointers.asm', romname],
+        process = subprocess.Popen(['asar.exe', './global_ow_code/autoclean_spr_pointers.asm', romname],
                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         (stdout, stderr) = process.communicate()
         if stderr == b'':
