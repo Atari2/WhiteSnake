@@ -21,7 +21,7 @@ def create_shared_patch():
         f.write('incsrc global_ow_code/macros.asm\n')
         f.write('freecode cleaned\n')
         for file in glob.glob('./routines/*.asm'):
-            if (!file.startswith('__')):
+            if not file.startswith('__'):
                 with open(file, 'r') as r:
                     lines = r.readlines()
                 f.write(f'print "$",pc," ;{file.replace(".asm", "")[file.rfind("routines") + len("routines") + 1:]}"\n')
