@@ -21,11 +21,12 @@ def create_shared_patch():
         f.write('incsrc global_ow_code/macros.asm\n')
         f.write('freecode cleaned\n')
         for file in glob.glob('./routines/*.asm'):
-            with open(file, 'r') as r:
-                lines = r.readlines()
-            f.write(f'print "$",pc," ;{file.replace(".asm", "")[file.rfind("routines") + len("routines") + 1:]}"\n')
-            f.writelines(lines)
-            f.write("\n\n")
+            if (!file.startswith('__')):
+                with open(file, 'r') as r:
+                    lines = r.readlines()
+                f.write(f'print "$",pc," ;{file.replace(".asm", "")[file.rfind("routines") + len("routines") + 1:]}"\n')
+                f.writelines(lines)
+                f.write("\n\n")
 
 
 def create_shared_sprites():
