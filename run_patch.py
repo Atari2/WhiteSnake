@@ -3,6 +3,7 @@ import glob
 import os
 from contextlib import suppress
 import sys
+from patchexception import PatchException
 
 
 def create_spr_macro(addr, name):
@@ -21,7 +22,7 @@ def create_shared_patch():
         f.write('incsrc global_ow_code/macros.asm\n')
         f.write('freecode cleaned\n')
         for file in glob.glob('./routines/*.asm'):
-            routine_name = file.replace(".asm","")[file.rfind("routines") + len("routines")+1:]
+            routine_name = file.replace(".asm", "")[file.rfind("routines") + len("routines") + 1:]
             if not routine_name:
                 with open(file, 'r') as r:
                     lines = r.readlines()
@@ -54,12 +55,13 @@ def get_spr_pointers(romname):
                                        universal_newlines=True)
             process.communicate()
         with open('err_log.txt', 'r') as t:
+            err = t.read()
             remove_err_log = True if not t.readlines() else False
 
         if remove_err_log:
             os.remove('err_log.txt')
         else:
-            exit(-1)
+            raise PatchException(err)
 
 
 def clean_old_pointers(romname):
@@ -72,7 +74,7 @@ def clean_old_pointers(romname):
         if stderr == b'':
             print('Pointers were autocleaned', stdout.decode(encoding='utf-8'))
         else:
-            print('Errors were found while cleaning the old pointers', stderr.decode(encoding='utf-8'))
+            raise PatchException(f'Errors were found while cleaning the old pointers {stderr.decode(encoding="utf-8")}')
     except ValueError:
         print('No pointers to autoclean were found')
     try:
@@ -83,7 +85,7 @@ def clean_old_pointers(romname):
         if stderr == b'':
             print('Sprite pointers were autocleaned', stdout.decode(encoding='utf-8'))
         else:
-            print('Errors were found while cleaning the old pointers', stderr.decode(encoding='utf-8'))
+            raise PatchException(f'Errors were found while cleaning the old pointers {stderr.decode(encoding="utf-8")}')
     except ValueError:
         print('No sprite pointers to autoclean were found')
 
@@ -95,12 +97,13 @@ def apply_shared_patch(romname):
         process.communicate()
 
     with open('err_log.txt', 'r') as t:
+        err = t.read()
         remove_err_log = True if not t.readlines() else False
 
     if remove_err_log:
         os.remove('err_log.txt')
     else:
-        exit(-1)
+        raise PatchException(err)
 
 
 def create_autoclean(autoclean_file, macro_file, pointers, is_sprites):
@@ -111,7 +114,8 @@ def create_autoclean(autoclean_file, macro_file, pointers, is_sprites):
         for line in lines:
             f.write('autoclean ' + line + '\n')
             if is_sprites:
-                m.write(create_spr_macro(line.split(' ')[0].strip('\n'), line.split(' ')[1].strip('\n').replace(";", "")))
+                m.write(
+                    create_spr_macro(line.split(' ')[0].strip('\n'), line.split(' ')[1].strip('\n').replace(";", "")))
             else:
                 m.write(create_macro(line.split(' ')[0].strip('\n'), line.split(' ')[1].strip('\n').replace(";", "")))
 
@@ -159,27 +163,41 @@ def add_asm_to_sprites():
             p.writelines(lines)
 
 
-def remove_temp_files():
+def remove_temp_files(romname):
     os.remove('pointers.asm')
     os.remove('shared_patch.asm')
     os.remove('spr_pointers.asm')
+    os.remove('__'+romname)
+
+
+def copy_rom(old, new):
+    from shutil import copyfile
+    copyfile(old, new)
 
 
 if len(sys.argv) == 1:
     rom = input('Insert the name of your rom here:\n')
 else:
     rom = sys.argv[1]
-clean_old_pointers(rom)
-create_shared_patch()
-apply_shared_patch(rom)
-create_autoclean('./global_ow_code/autoclean_pointers.asm',
-                 './global_ow_code/macro_pointers.asm',
-                 'pointers.asm', False)
-add_asm_to_sprites()
-create_shared_sprites()
-get_spr_pointers(rom)
-create_autoclean('./global_ow_code/autoclean_spr_pointers.asm',
-                 './global_ow_code/macro_spr_pointers.asm',
-                 'spr_pointers.asm', True)
-prepare_uberasm_file()
-remove_temp_files()
+actual_name = rom[rom.rfind("\\")+1:]
+rom_backup = rom[:rom.rfind("\\")+1] + '__' + actual_name
+copy_rom(rom, rom_backup)
+try:
+    clean_old_pointers(rom)
+    create_shared_patch()
+    apply_shared_patch(rom)
+    create_autoclean('./global_ow_code/autoclean_pointers.asm',
+                     './global_ow_code/macro_pointers.asm',
+                     'pointers.asm', False)
+    add_asm_to_sprites()
+    create_shared_sprites()
+    get_spr_pointers(rom)
+    create_autoclean('./global_ow_code/autoclean_spr_pointers.asm',
+                     './global_ow_code/macro_spr_pointers.asm',
+                     'spr_pointers.asm', True)
+    prepare_uberasm_file()
+    remove_temp_files(rom_backup)
+except PatchException as e:
+    print(str(e))
+    print('Restoring rom to previous state...')
+    copy_rom(rom_backup, rom)
