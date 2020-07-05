@@ -23,7 +23,7 @@ def create_shared_patch():
         f.write('freecode cleaned\n')
         for file in glob.glob('./routines/*.asm'):
             routine_name = file.replace(".asm", "")[file.rfind("routines") + len("routines") + 1:]
-            if not routine_name:
+            if not routine_name.startswith('__'):
                 with open(file, 'r') as r:
                     lines = r.readlines()
                 f.write(f'print "$",pc," ;{routine_name}"\n')
