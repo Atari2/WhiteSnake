@@ -4,6 +4,7 @@ import os
 from contextlib import suppress
 import sys
 from patchexception import PatchException
+from owsprite import OWSprite
 
 
 def create_spr_macro(addr, name):
