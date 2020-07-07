@@ -5,13 +5,14 @@ from patchexception import PatchException
 from owsprite import OWSprite
 from routine import Routine
 import asar
+import re
 from rom import Rom
 
 
 def create_routines():
     local_routines = []
     for file in glob.glob('./routines/*.asm'):
-        routine_name = file.replace(".asm", "")[file.rfind("routines") + len("routines") + 1:]
+        routine_name = re.findall(r'\w+\.asm', file)[-1].replace('.asm', '')
         if not routine_name.startswith('__'):
             local_routines.append(Routine(file))
     return local_routines
@@ -19,8 +20,8 @@ def create_routines():
 
 def create_sprites():
     local_sprites = []
-    for file in glob.glob('./sprites/*.asm'):
-        file_name = file.replace(".asm", "")[file.rfind("sprites") + len("sprites") + 1:]
+    for file in glob.glob('./sprites/**/*.asm', recursive=True):
+        file_name = re.findall(r'\w+\.asm', file)[-1].replace('.asm', '')
         if not file_name.startswith('__'):
             local_sprites.append(OWSprite(file))
     return local_sprites
