@@ -1,6 +1,5 @@
 if read1($00FFD5) == $23		; check if the rom is sa-1
 	sa1rom
-	!bufferIndexes = $408500
 	!sa1 = 1
 	!SA1 = 1
 	!SA_1 = 1
@@ -17,7 +16,6 @@ if read1($00FFD5) == $23		; check if the rom is sa-1
 	!SprSize = $16
 else
 	lorom
-	!bufferIndexes = $7FB500
 	!sa1 = 0
 	!SA1 = 0
 	!SA_1 = 0
@@ -50,8 +48,40 @@ macro define_base2_address(name, addr)
 	endif
 endmacro
 
-%define_base2_address("15E9",$15E9)
+macro define_base2_address_name(name, addr, long_name)
+    if !SA1 == 0
+        !<name> = <addr>
+    else
+        !<name> = <addr>|!addr
+    endif
+    !<long_name> = !<name>
+endmacro
 
+
+; ow sprite tables
+%define_base2_address_name("0DDE", $0DDE, "sprite_index")
+%define_base2_address_name("0DDF", $0DDF, "starting_oam_index")
+%define_base2_address_name("0DE5", $0DE5, "sprite_number")
+%define_base2_address_name("0DF5", $0DF5, "misc_table_1")
+%define_base2_address_name("0E05", $0E05, "misc_table_2")
+%define_base2_address_name("0E15", $0E15, "misc_table_3")
+%define_base2_address_name("0E25", $0E25, "misc_table_4")
+%define_base2_address_name("0E35", $0E35, "sprite_x_pos_lo")
+%define_base2_address_name("0E45", $0E45, "sprite_y_pos_lo")
+%define_base2_address_name("0E55", $0E55, "sprite_z_pos_lo")
+%define_base2_address_name("0E65", $0E65, "sprite_x_pos_hi")
+%define_base2_address_name("0E75", $0E75, "sprite_y_pos_hi")
+%define_base2_address_name("0E85", $0E85, "sprite_z_pos_hi")
+%define_base2_address_name("0E95", $0E95, "sprite_x_speed")
+%define_base2_address_name("0EA5", $0EA5, "sprite_y_speed")
+%define_base2_address_name("0EB5", $0EB5, "sprite_z_speed")
+%define_base2_address_name("0EC5", $0EC5, "fraction_bit_x_speed")
+%define_base2_address_name("0ED5", $0ED5, "fraction_bit_y_speed")
+%define_base2_address_name("0EF5", $0EE5, "fraction_bit_z_speed")
+
+
+; normal sprite tables
+%define_base2_address("15E9",$15E9)
 %define_spr_ow_table("9E", $9E, $3200)
 %define_spr_ow_table("AA", $AA, $9E)
 %define_spr_ow_table("B6", $B6, $B6)

@@ -1,5 +1,4 @@
 import glob
-import os
 import sys
 from patchexception import PatchException
 from owsprite import OWSprite
@@ -51,6 +50,7 @@ try:
     asar.init(dll_path='./asar.dll')
 except OSError:
     print('asar.dll wasn\'t found')
+    exit(-1)
 
 if len(sys.argv) == 1:
     romname = input('Insert the name of your rom here:\n')
