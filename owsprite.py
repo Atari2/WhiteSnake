@@ -1,21 +1,22 @@
 from patchexception import PatchException
 import os
 from rom import Rom
+import re
 
 
 class OWSprite:
     incsrc = 'incsrc global_ow_code/defines.asm\nincsrc global_ow_code/macros.asm\nincsrc ' \
              'global_ow_code/macro_pointers.asm\nfreecode cleaned\n'
 
-    def __init__(self, name):
+    def __init__(self, file):
         self.other = ''
         self.init = ''
         self.main = ''
         self.init_ptr = None
         self.main_ptr = None
-        self.name = name.replace(".asm", "")[name.rfind("sprites") + len("sprites") + 1:]
-        self.path = name
-        with open(name, 'r') as f:
+        self.name = re.findall(r'\w+\.asm', file)[-1].replace('.asm', '')
+        self.path = file
+        with open(file, 'r') as f:
             lines = f.readlines()
         handler = 0
         for line in lines:

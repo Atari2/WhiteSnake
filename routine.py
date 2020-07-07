@@ -2,6 +2,7 @@ import asar
 from rom import Rom
 from patchexception import PatchException
 import os
+import re
 
 
 class Routine:
@@ -10,7 +11,7 @@ class Routine:
     def __init__(self, file):
         self.path = file
         self.ptr = None
-        self.name = file.replace(".asm", "")[file.rfind("routines") + len("routines") + 1:]
+        self.name = re.findall(r'\w+\.asm', file)[-1].replace('.asm', '')
         with open(self.path, 'r') as r:
             self.routine = f'print "$",pc\n{r.read()}\n\n'
 

@@ -30,21 +30,20 @@ def create_sprites():
 def prepare_uberasm_file():
     add_incsrc = 'incsrc global_ow_code/macro_spr_pointers.asm\nincsrc global_ow_code/macro_pointers.asm\n'
     with open('global_uberasm_code.asm', 'w') as p:
-        filenames = os.listdir('sprites')
+        filenames = [re.findall(r'\w+\.asm', file)[-1].replace('.asm', '')
+                     for file in glob.glob('./sprites/**/*.asm', recursive=True)]
         p.write(add_incsrc)
         p.write('init:\n')
         p.write('LDX #$FF\n')
         for file in filenames:
-            if file.endswith('.asm'):
-                p.write('INX\n')
-                p.write('%' + file.replace('.asm', '') + '_init()\n')
+            p.write('INX\n')
+            p.write('%' + file + '_init()\n')
         p.write('RTL\n')
         p.write('main:\n')
         p.write('%dec_timers()\nLDX #$FF\n')
         for file in filenames:
-            if file.endswith('.asm'):
-                p.write('INX\n')
-                p.write('%' + file.replace('.asm', '') + '_main()\n')
+            p.write('INX\n')
+            p.write('%' + file + '_main()\n')
         p.write('RTL\n')
 
 
