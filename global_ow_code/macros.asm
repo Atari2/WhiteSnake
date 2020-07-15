@@ -12,15 +12,15 @@ macro savex(label)
 endmacro
 
 macro bankWrapper(label)
-	PHB : PHK : PLB : JSR label : PLB
+	PHB : PHK : PLB : JSR <label> : PLB
 endmacro
 
 macro setDB(label, db)
 	PHB
 	LDA <db>
-	PLA
+	PHA
 	PLB 
-	JSL label
+	JSL <label>
 	PLB
 endmacro
 	

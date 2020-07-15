@@ -1,0 +1,34 @@
+; Rom addresses
+
+
+$04F675 -> routine that initializes OW sprites during title screen
+$04FE62 -> getdrawinfo for overworld sprites
+$04FE90 -> update overworld sprite low positions
+$0EF55D	-> Used by Lunar Magic as a 24-bit pointer to custom overworld sprite data.
+$009AA4 -> Jumps to 04F675 to initialize OW sprites
+$04F625 -> Overworld sprite data. Five bytes per sprite: sprite number, x-pos, y-pos.
+$04F829, $04F833, $04FB43 -> various OW sprite data tables
+$04F853 -> ExecutePtr for OW sprites, uses $04F87C to check if sprite should be processed on submap
+$04F87C -> Routine to determine whether to process an overworld sprite.
+$04F85F	-> Overworld sprite MAIN pointers.
+
+; Ram values
+$7E0DDE -> OW sprite index
+$7E0DDF -> Starting OAM index for overworld sprites. Appears to be used only by the cloud sprites.
+; Ram tables
+$7E0DE5 -> OW Sprite number
+$7E0DF5, $7E0E05, $7E0E15, $7E0E2 -> Miscellaneous sprite tables
+$7E0E35 -> OW Sprite x position, low byte
+$7E0E45 -> OW Sprite Y position, low byte
+$7E0E55 -> Overworld sprite Z position, low byte; distance that the sprite is from the ground.
+$7E0E65 -> Overworld sprite X position, high byte.
+$7E0E75 -> Overworld sprite Y position, high byte.
+$7E0E85 -> Overworld sprite Z position, high byte.
+$7E0E95 -> Overworld sprite X speed.
+$7E0EA5 -> Overworld sprite Y speed.
+$7E0EB5 -> Overworld sprite Z speed.
+$7E0EC5 -> Accumulating fraction bits for overworld sprite X speed.
+$7E0ED5 -> Accumulating fraction bits for overworld sprite Y speed.
+$7E0EE5 -> Accumulating fraction bits for overworld sprite Z speed.
+
+Overworld sprites are only initalized once during title screen (?)
