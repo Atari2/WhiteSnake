@@ -32,8 +32,8 @@ class Routine:
             rom.data = rom_data
             ptrs = asar.getprints()
             self.ptr = ptrs[0]
-            print(f'Sprite {self.name} was applied correctly')
+            print(f'Routine {self.name} was applied correctly')
         else:
             print(asar.geterrors())
-            raise PatchException(f'Sprite {self.name} encountered an error while patching')
+            raise PatchException(f'Routine {self.name} encountered an error while patching')
         os.remove(f'tmp_{self.name}.asm')

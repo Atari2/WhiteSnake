@@ -55,8 +55,7 @@ class OWSprite:
         if success:
             rom.data = rom_data
             ptrs = asar.getprints()
-            self.init_ptr = ptrs[0]
-            self.main_ptr = ptrs[1]
+            self.set_ptrs(ptrs[0], ptrs[1])
             print(f'Sprite {self.name} was applied correctly')
         else:
             print(asar.geterrors())
