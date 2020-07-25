@@ -1,0 +1,43 @@
+The 3 byte SNES pointer for the list can be found at 0x7775D PC in the ROM. If the pointer is 0 or 0xFFFFFF, no custom sprites are present on the overworld. Lunar Magic manages the table on its own and will delete, change or relocate it when needed, so keep this in mind.
+
+The table format is fairly close to the one in Lui37's patch, and would point to sprite_data (see below). The difference for Lunar Magic is that sprite_data has 2 byte offsets rather than pointers. Up to 0x18 sprites per submap are supported.
+
+macro spr(id, x, y, z, extra)
+	db <id>|((<x>&1)<<7)
+	db (<x>>>1)|((<y>&7)<<5)
+	db (<y>>>3)|(<z><<3)
+	db <extra>
+endmacro
+
+;Note: for LM these are offsets instead
+sprite_data:
+	dw .MainMap - sprite_data
+	dw .YoshisIsland - sprite_data
+	dw .VanillaDome - sprite_data
+	dw .ForestOfIllusion - sprite_data
+	dw .BowsersValley - sprite_data
+	dw .SpecialWorld - sprite_data
+	dw .StarWorld - sprite_data
+
+.MainMap:
+	dw $0000
+
+.YoshisIsland:
+	%spr(!some_id, !x, !y, !z, !extra)
+	dw $0000
+
+.VanillaDome:
+	dw $0000
+
+.ForestOfIllusion:
+	dw $0000
+
+.BowsersValley:
+	dw $0000
+
+.SpecialWorld:
+	dw $0000
+
+.StarWorld:
+	dw $0000
+Warning: Lunar Magic only inserts the table. It's up to you or a 3rd party utility to modify the game code or apply a patch to make use of it. If you don't, it won't actively harm anything but no custom sprites displayed by Lunar Magic's overworld editor will show up in the game.
