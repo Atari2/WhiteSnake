@@ -22,7 +22,18 @@ def create_routines():
 
 def create_sprites():
     local_sprites = []
-    for file in glob.glob('./sprites/**/*.asm', recursive=True):
+    try:
+        with open('list.txt', 'r') as listfile:
+            spritelist = listfile.readlines()
+    except IOError:
+        print('List file not found.')
+        exit(-1)
+    for lineno, file in enumerate(spritelist):
+        match = re.match(r'([0-9A-F]{2}) +(.*\.asm)', file)
+        if not match:
+            print(f'Error in list.txt at line {lineno+1}', f'<{file}>')
+            exit(-1)
+        file = match.group(2)
         file_name = re.findall(r'\w+\.asm', file)[-1].replace('.asm', '')
         if not file_name.startswith('__'):
             local_sprites.append(OWSprite(file))

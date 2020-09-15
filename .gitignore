@@ -133,3 +133,5 @@ global_uberasm_code.asm
 sysLMRestore
 global_ow_code/autoclean_routines.asm
 global_ow_code/routines.asm
+.idea/discord.xml
+.idea/WhiteSnake.iml
