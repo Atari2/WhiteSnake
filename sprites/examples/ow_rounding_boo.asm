@@ -1,9 +1,17 @@
 ; Turning code stolen from Blind Devil's Rounding Boo
-; GetDrawInfo stolen from pixi
+macro SetOAMProp(XPos, YPos, Tile, Props, Size)
+    LDA <XPos> : STA $0300|!addr,y    ; xpos on screen
+    LDA <YPos> : STA $0301|!addr,y    ; ypos on screen
+    LDA <Tile> : STA $0302|!addr,y    ; tile
+    LDA <Props> : STA $0303|!addr,y   ; yxppccct
+    TYA : LSR #$2 : TAY
+    LDA <Size> : STA $0460|!addr,y
+endmacro
 !MaxXSpd = $06
 !TimeToTurn = $40
 !StartingY = $40
 !StartingX = $58
+print "INIT", pc
 init:
 LDA #!StartingX
 STA !E4,x
@@ -17,6 +25,7 @@ STZ !157C,x
 STZ !B6,x
 RTL
 
+print "MAIN", pc
 main:
 LDA !C2,x           ; set Y speed for wobbly effect
 AND.b #$01
@@ -76,18 +85,26 @@ BEQ .updatepos
 DEC !B6,x
 
 .updatepos 
-%savex($01801A)   
-%savex($018022)
+PHX : JSL $01801A : PLX
+PHX : JSL $018022 : PLX
 
-%getdrawinfo() 
+%OverworldGetDrawInfo()
 LDY !1602,x
 LDA Tiles,y
 STA $02
 LDY !157C,x
 LDA Props,y
 STA $03
-%getoamindex()
-%SetOAMProp($00, $01, $02, $03, #$00)     
+	LDY #$00
+    -
+    LDA $0301|!addr,Y
+    CMP #$F0
+    BEQ +
+    INY #4
+	CPY #$FC
+    BNE -        ;if Y == 0, kill everything
+    +
+%SetOAMProp($00, $01, $02, $03, #$00)
 RTL
 
 Props:

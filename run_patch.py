@@ -1,11 +1,14 @@
 import glob
 import sys
+import os
 from patchexception import PatchException
 from owsprite import OWSprite
 from routine import Routine
 import asar
 import re
 from rom import Rom
+
+SPRITE_COUNT = 0x80
 
 
 def create_routines():
@@ -26,26 +29,6 @@ def create_sprites():
     return local_sprites
 
 
-def prepare_uberasm_file():
-    add_incsrc = 'incsrc global_ow_code/macro_spr_pointers.asm\nincsrc global_ow_code/macro_pointers.asm\n'
-    with open('global_uberasm_code.asm', 'w') as p:
-        filenames = [re.findall(r'\w+\.asm', file)[-1].replace('.asm', '')
-                     for file in glob.glob('./sprites/**/*.asm', recursive=True)]
-        p.write(add_incsrc)
-        p.write('init:\n')
-        p.write('LDX #$FF\n')
-        for file in filenames:
-            p.write('INX\n')
-            p.write('%' + file + '_init()\n')
-        p.write('RTL\n')
-        p.write('main:\n')
-        p.write('%dec_timers()\nLDX #$FF\n')
-        for file in filenames:
-            p.write('INX\n')
-            p.write('%' + file + '_main()\n')
-        p.write('RTL\n')
-
-
 try:
     asar.init(dll_path='./asar.dll')
 except OSError:
@@ -58,13 +41,14 @@ else:
     romname = sys.argv[1]
 
 rom = Rom(romname)
-rom.autoclean_rom()
-routines = create_routines()
-sprites = create_sprites()
 try:
-    m = open('./global_ow_code/macro_pointers.asm', 'w')
-    s = open('./global_ow_code/macro_spr_pointers.asm', 'w')
-    with open('./global_ow_code/autoclean_pointers.asm', 'w') as f:
+    rom.autoclean_rom('./global_ow_code/autoclean_routines.asm')
+    routines = create_routines()
+    sprites = create_sprites()
+    m = open('./global_ow_code/routines.asm', 'w')
+    with open('./global_ow_code/autoclean_routines.asm', 'w') as f, \
+            open('./global_ow_code/_OverworldInitPtr.bin', 'wb') as init_table, \
+            open('./global_ow_code/_OverworldMainPtr.bin', 'wb') as main_table:
         for routine in routines:
             routine.patch_routine(rom)
             f.write(routine.create_autoclean())
@@ -72,11 +56,16 @@ try:
         m.close()
         for sprite in sprites:
             sprite.patch_sprite(rom)
-            f.write(sprite.create_autoclean())
-            s.write(sprite.init_macro())
-            s.write(sprite.main_macro())
-        s.close()
+        for i in range(SPRITE_COUNT):
+            try:
+                init_table.write(sprites[i].init_ptr.to_bytes(3, byteorder='little', signed=False))
+                main_table.write(sprites[i].main_ptr.to_bytes(3, byteorder='little', signed=False))
+            except IndexError:
+                init_table.write((0).to_bytes(3, byteorder='big', signed=False))
+                main_table.write((0).to_bytes(3, byteorder='big', signed=False))
+    rom.patch_rom('./global_ow_code/ow_main.asm')
     rom.save_rom()
-    prepare_uberasm_file()
+    os.remove('./global_ow_code/_OverworldInitPtr.bin')
+    os.remove('./global_ow_code/_OverworldMainPtr.bin')
 except PatchException as e:
     print(str(e))

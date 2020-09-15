@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 asar.exe
 test.smc
-global_ow_code/autoclean_pointers.asm
-global_ow_code/macro_pointers.asm
-global_ow_code/macro_spr_pointers.asm
 global_uberasm_code.asm
+sysLMRestore
+global_ow_code/autoclean_routines.asm
+global_ow_code/routines.asm

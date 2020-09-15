@@ -5,8 +5,7 @@ import re
 
 
 class OWSprite:
-    incsrc = 'incsrc global_ow_code/defines.asm\nincsrc global_ow_code/macros.asm\nincsrc ' \
-             'global_ow_code/macro_pointers.asm\nfreecode cleaned\n'
+    incsrc = 'incsrc "./global_ow_code/defines.asm"\nincsrc "./global_ow_code/routines.asm"\nfreecode cleaned\n'
 
     def __init__(self, file):
         self.other = ''
@@ -20,11 +19,11 @@ class OWSprite:
             lines = f.readlines()
         handler = 0
         for line in lines:
-            if line.startswith('init:'):
-                self.initline = f'print "$",pc\n{self.name}_init:\nPHK : PLB\nJSL $07F7D2\n'
+            if line.startswith('print "INIT", pc'):
+                self.initline = line
                 handler = 1
-            elif line.startswith('main:'):
-                self.mainline = f'print "$",pc\n{self.name}_main:\nPHK : PLB\n'
+            elif line.startswith('print "MAIN", pc'):
+                self.mainline = line
                 handler = 2
             else:
                 if handler == 0:
@@ -38,14 +37,8 @@ class OWSprite:
         return self.other + self.incsrc + self.initline + self.init + self.mainline + self.main
 
     def set_ptrs(self, init_ptr, main_ptr):
-        self.init_ptr = init_ptr
-        self.main_ptr = main_ptr
-
-    def init_macro(self):
-        return f'macro {self.name}_init()\n\tPHB : JSL {self.init_ptr} : PLB\nendmacro\n'
-
-    def main_macro(self):
-        return f'macro {self.name}_main()\n\tPHB : JSL {self.main_ptr} : PLB\nendmacro\n'
+        self.init_ptr = int(init_ptr, 16)
+        self.main_ptr = int(main_ptr, 16)
 
     def patch_sprite(self, rom: Rom):
         import asar
@@ -55,12 +48,10 @@ class OWSprite:
         if success:
             rom.data = rom_data
             ptrs = asar.getprints()
-            self.set_ptrs(ptrs[0], ptrs[1])
+            self.set_ptrs(ptrs[0][-6:], ptrs[1][-6:])
             print(f'Sprite {self.name} was applied correctly')
         else:
             print(asar.geterrors())
             raise PatchException(f'Sprite {self.name} encountered an error while patching')
         os.remove(f'tmp_{self.name}.asm')
 
-    def create_autoclean(self):
-        return f'autoclean {self.init_ptr}\nautoclean {self.main_ptr}\n'

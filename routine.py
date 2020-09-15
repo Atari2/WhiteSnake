@@ -6,7 +6,7 @@ import re
 
 
 class Routine:
-    incsrc = 'incsrc global_ow_code/defines.asm\nincsrc global_ow_code/macros.asm\nfreecode cleaned\n'
+    incsrc = 'incsrc global_ow_code/defines.asm\nfreecode cleaned\n'
 
     def __init__(self, file):
         self.path = file
@@ -16,7 +16,7 @@ class Routine:
             self.routine = f'print "$",pc\n{r.read()}\n\n'
 
     def __str__(self):
-        return self.incsrc + self.routine
+        return self.incsrc + 'parent:\n' + self.routine
 
     def create_macro(self):
         return f'macro {self.name}()\n\tJSL {self.ptr}\nendmacro\n'
